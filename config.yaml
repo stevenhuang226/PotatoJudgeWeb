@@ -1,1 +1,15 @@
-base_problem_path: /tmp/pj_pro
+debug: false
+problem:
+  path: "/tmp/pj_pro"
+  explanation: "explanation.md"
+  case_prefix: "input"
+  case_suffix: ".bin"
+submit:
+  path: "/tmp/pj_sub"
+  socket: "/tmp/pj.socket"
+  maxConcurrent: 2
+server:
+  host: "127.0.0.1"
+  port: 8080
+static:
+  path: "../web"

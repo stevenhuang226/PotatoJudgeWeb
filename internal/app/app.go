@@ -1,5 +1,6 @@
 package app
 
 type App struct {
-	Config *Config
+	Config  *Config
+	Service *Service
 }

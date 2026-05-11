@@ -13,14 +13,19 @@ type Config struct {
 	Submit   SubmitConfig   `yaml:"submit"`
 	Database DatabaseConfig `yaml:"database"`
 	Server   ServerConfig   `yaml:"server"`
+	Static   StaticConfig   `yaml:"static"`
 }
 
 type ProblemConfig struct {
-	Path string `yaml:"path"`
+	BasePath        string `yaml:"path"`
+	ExplanationName string `yaml:"explanation"`
+	CasePrefix      string `yaml:"case_prefix"`
+	CaseSuffix      string `yaml:"case_suffix"`
 }
 
 type SubmitConfig struct {
-	Path               string `yaml:"path"`
+	BasePath           string `yaml:"path"`
+	SocketPath         string `yaml:"socket"`
 	MaxConcurrentJudge uint16 `yaml:"maxConcurrent"`
 }
 
@@ -31,6 +36,10 @@ type DatabaseConfig struct {
 type ServerConfig struct {
 	Host string `yaml:"host"`
 	Port uint16 `yaml:"port"`
+}
+
+type StaticConfig struct {
+	BasePath string `yaml:"path"`
 }
 
 const defaultConfigPath string = "./config.yaml"
@@ -48,7 +57,7 @@ func resolveConfigPath() string {
 	return defaultConfigPath
 }
 
-func load_config(configPath string) (*Config, error) {
+func LoadConfig(configPath string) (*Config, error) {
 	raw, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, err

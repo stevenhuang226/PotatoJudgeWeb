@@ -20,7 +20,7 @@ domain/problem?id=<id>&kind=explanation
 domain/problem?id=<id>&kind=test_cases&case_id=<case_id>
 */
 
-func (ps *ProblemService) Handler(res http.ResponseWriter, req *http.Request) {
+func (svc *ProblemService) Handler(res http.ResponseWriter, req *http.Request) {
 	const (
 		KindExplanation string = "explanation"
 		KindTestCases   string = "test_cases"
@@ -31,16 +31,16 @@ func (ps *ProblemService) Handler(res http.ResponseWriter, req *http.Request) {
 
 	switch kind {
 	case KindExplanation:
-		ps.ExplanationHandler(res, req)
+		svc.ExplanationHandler(res, req)
 	case KindTestCases:
-		ps.TestCasesHandler(res, req)
+		svc.TestCasesHandler(res, req)
 	default:
 		http.NotFound(res, req)
 		return
 	}
 }
 
-func (ps *ProblemService) ExplanationHandler(res http.ResponseWriter, req *http.Request) {
+func (svc *ProblemService) ExplanationHandler(res http.ResponseWriter, req *http.Request) {
 	const (
 		ExplanationFileName string = "explanation.md"
 	)
@@ -53,7 +53,7 @@ func (ps *ProblemService) ExplanationHandler(res http.ResponseWriter, req *http.
 		return
 	}
 
-	target := filepath.Join(ps.BasePath, strconv.Itoa(id), ps.ExplanationName)
+	target := filepath.Join(svc.BasePath, strconv.Itoa(id), svc.ExplanationName)
 
 	data, err := os.ReadFile(target)
 	if err != nil {
@@ -67,7 +67,7 @@ func (ps *ProblemService) ExplanationHandler(res http.ResponseWriter, req *http.
 	return
 }
 
-func (ps *ProblemService) TestCasesHandler(res http.ResponseWriter, req *http.Request) {
+func (svc *ProblemService) TestCasesHandler(res http.ResponseWriter, req *http.Request) {
 	idStr := req.URL.Query().Get("id")
 	caseIdStr := req.URL.Query().Get("case_id")
 
@@ -83,8 +83,8 @@ func (ps *ProblemService) TestCasesHandler(res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	fileName := ps.CasePrefix + strconv.Itoa(caseId) + ps.CaseSuffix
-	target := filepath.Join(ps.BasePath, strconv.Itoa(id), fileName)
+	fileName := svc.CasePrefix + strconv.Itoa(caseId) + svc.CaseSuffix
+	target := filepath.Join(svc.BasePath, strconv.Itoa(id), fileName)
 
 	data, err := os.ReadFile(target)
 	if err != nil {
