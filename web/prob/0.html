@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+
+<html>
+	<header>
+		<title>Potato Judge - Problem 0</title>
+	</header>
+	<body>
+		<h1>Hello World</h1>
+
+		<div id="explanation"></div>
+
+		<script type="module">
+			import {marked} from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+			const explanation_res = await fetch("/problem?id=0&kind=explanation");
+			const explanation_text = await explanation_res.text();
+
+			document.getElementById("explanation").innerHTML = marked.parse(explanation_text);
+		</script>
+	</body>
+</html>
