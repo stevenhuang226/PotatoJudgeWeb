@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"os"
+	"time"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -30,7 +31,10 @@ type SubmitConfig struct {
 }
 
 type DatabaseConfig struct {
-	Path string `yaml:"path"`
+	DSN             string        `yaml:"dsn"`
+	MaxOpenConns    int           `yaml:"max_open_conns"`
+	MaxIdleConns    int           `yaml:"max_idle_conns"`
+	MaxConnLifetime time.Duration `yaml:"conn_max_lifetime"`
 }
 
 type ServerConfig struct {

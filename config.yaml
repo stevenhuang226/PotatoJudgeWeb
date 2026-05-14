@@ -13,3 +13,9 @@ server:
   port: 8080
 static:
   path: "../web"
+
+database:
+  dsn: "postgres://user:pwd@host:5432/db"
+  max_open_conns: 16
+  max_idle_conns: 8
+  conn_max_lifetime: 1h

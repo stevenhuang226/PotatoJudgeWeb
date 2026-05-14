@@ -6,20 +6,29 @@ import (
 	"net/http"
 	"pjweb/internal/api"
 	"pjweb/internal/config"
+	"pjweb/internal/db"
 )
 
 func main() {
 	applicationConfig, err := config.LoadConfig("../config.yaml")
 	if err != nil {
-		fmt.Print("config error")
+		fmt.Print("config error\n")
 		return
 	}
 
-	routerService, err := api.RouterServiceByConfig(applicationConfig)
+	db, err := db.New(&applicationConfig.Database)
 	if err != nil {
-		fmt.Print("service error")
+		fmt.Print("db init error\n")
+		fmt.Print(err)
+		return
 	}
-	router := api.NewRouter(routerService)
+
+	routerService, err := api.NewRouterService(applicationConfig)
+	if err != nil {
+		fmt.Print("service error\n")
+		return
+	}
+	router := api.NewMux(routerService)
 
 	server := &http.Server{
 		Addr:    ":8080",
@@ -27,4 +36,6 @@ func main() {
 	}
 
 	log.Fatal(server.ListenAndServe())
+
+	db.Conn.Close()
 }

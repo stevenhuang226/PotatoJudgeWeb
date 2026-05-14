@@ -10,7 +10,7 @@ type Service struct {
 	Static  StaticService
 }
 
-func NewRouter(svc *Service) http.Handler {
+func NewMux(svc *Service) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/problem", svc.Problem.Handler)
@@ -19,7 +19,7 @@ func NewRouter(svc *Service) http.Handler {
 	return mux
 }
 
-func RouterServiceByConfig(cfg *config.Config) (*Service, error) {
+func NewRouterService(cfg *config.Config) (*Service, error) {
 	var svc Service
 
 	svc.Problem.BasePath = cfg.Problem.BasePath

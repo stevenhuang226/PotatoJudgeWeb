@@ -41,10 +41,6 @@ func (svc *ProblemService) Handler(res http.ResponseWriter, req *http.Request) {
 }
 
 func (svc *ProblemService) ExplanationHandler(res http.ResponseWriter, req *http.Request) {
-	const (
-		ExplanationFileName string = "explanation.md"
-	)
-
 	idStr := req.URL.Query().Get("id")
 
 	id, err := strconv.Atoi(idStr)
