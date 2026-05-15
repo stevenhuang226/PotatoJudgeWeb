@@ -27,7 +27,8 @@ type ProblemConfig struct {
 type SubmitConfig struct {
 	BasePath           string `yaml:"path"`
 	SocketPath         string `yaml:"socket"`
-	MaxConcurrentJudge uint16 `yaml:"maxConcurrent"`
+	MaxQueueSize       int32  `yaml:"maxQueueSize"`
+	MaxConcurrentJudge int32  `yaml:"maxConcurrent"`
 }
 
 type DatabaseConfig struct {
