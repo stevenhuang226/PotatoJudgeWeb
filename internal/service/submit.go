@@ -20,9 +20,9 @@ type SubmitService struct {
 }
 
 type Submission struct {
-	uint32 sub_id
-	uint32 pro_id
-	uint32 compilerType
+	Id           uint32
+	ProblemId    uint32
+	CompilerType int32
 }
 
 func New(cfg *config.SubmitConfig) (*SubmitService, error) {
@@ -49,4 +49,6 @@ func New(cfg *config.SubmitConfig) (*SubmitService, error) {
 
 func (svc *SubmitService) Submit(sub *Submission) error {
 	return nil
+
+	/* check problem exist */
 }
