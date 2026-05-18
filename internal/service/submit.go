@@ -15,6 +15,8 @@ const (
 )
 
 type SubmitService struct {
+	BasePath          string
+	SocketPath        string
 	MaxQueueSize      int
 	MaxConcurrentJobs int
 }
@@ -23,6 +25,7 @@ type Submission struct {
 	Id           uint32
 	ProblemId    uint32
 	CompilerType int32
+	Source       string
 }
 
 func New(cfg *config.SubmitConfig) (*SubmitService, error) {
@@ -30,19 +33,31 @@ func New(cfg *config.SubmitConfig) (*SubmitService, error) {
 		return nil, errors.New("no submit cfg")
 	}
 
-	MaxQueueSize := cfg.MaxQueueSize
-	if MaxQueueSize <= 0 {
-		MaxQueueSize = DefMaxQueueSize
+	basePath := cfg.BasePath
+	if basePath == "" {
+		return nil, errors.New("no submit base path")
 	}
 
-	MaxConcurrentJobs := cfg.MaxConcurrentJudge
-	if MaxConcurrentJobs <= 0 {
-		MaxConcurrentJobs = DefMaxConcurrentJobs
+	socketPath := cfg.SocketPath
+	if socketPath == "" {
+		return nil, errors.New("no submit socket")
+	}
+
+	maxQueueSize := cfg.MaxQueueSize
+	if maxQueueSize <= 0 {
+		maxQueueSize = DefMaxQueueSize
+	}
+
+	maxConcurrentJobs := cfg.MaxConcurrentJudge
+	if maxConcurrentJobs <= 0 {
+		maxConcurrentJobs = DefMaxConcurrentJobs
 	}
 
 	var svc SubmitService
-	svc.MaxQueueSize = MaxQueueSize
-	svc.MaxConcurrentJobs = MaxConcurrentJobs
+	svc.MaxQueueSize = maxQueueSize
+	svc.MaxConcurrentJobs = maxConcurrentJobs
+	svc.BasePath = basePath
+	svc.SocketPath = socketPath
 
 	return &svc, nil
 }
