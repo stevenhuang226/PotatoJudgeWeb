@@ -63,8 +63,6 @@ func (handler *SubmitHandler) Handler(res http.ResponseWriter, req *http.Request
 		return
 	}
 
-	res.Write([]byte("ok")) // auto set header 200.Ok
+	res.Write([]byte("submit success")) // auto set header 200.Ok	// return when Submit return (aka in queue)
 	return
-
-	// write submission success back. And Submit(&submission) then exit
 }

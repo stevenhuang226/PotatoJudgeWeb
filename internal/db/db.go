@@ -4,19 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"pjweb/internal/app"
 	"pjweb/internal/config"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-type Database struct {
-	Conn *sql.DB
-}
-
-func New(cfg *config.DatabaseConfig) (*Database, error) {
+func (app *app.App) InitDB(cfg *config.DatabaseConfig) error {
 	if cfg == nil {
-		return nil, errors.New("nil DatabaseConfig")
+		return errors.New("nil DatabaseConfig")
 	}
 
 	const (
@@ -42,7 +39,7 @@ func New(cfg *config.DatabaseConfig) (*Database, error) {
 		cfg.DSN,
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	conn.SetMaxOpenConns(MaxOpenConns)
@@ -57,10 +54,9 @@ func New(cfg *config.DatabaseConfig) (*Database, error) {
 
 	if err := conn.PingContext(ctx); err != nil {
 		conn.Close()
-		return nil, err
+		return err
 	}
 
-	return &Database{
-		Conn: conn,
-	}, nil
+	app.Database.Conn = conn
+	return nil
 }

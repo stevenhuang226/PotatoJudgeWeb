@@ -20,8 +20,10 @@ type Config struct {
 type ProblemConfig struct {
 	BasePath        string `yaml:"path"`
 	ExplanationName string `yaml:"explanation"`
-	CasePrefix      string `yaml:"case_prefix"`
-	CaseSuffix      string `yaml:"case_suffix"`
+	InCasePrefix    string `yaml:"case_prefix_in"`
+	InCaseSuffix    string `yaml:"case_suffix_in"`
+	OutCasePrefix   string `yaml:"case_prefix_out"`
+	OutCaseSuffix   string `yaml:"case_suffix_out"`
 }
 
 type SubmitConfig struct {
