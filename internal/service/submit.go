@@ -2,8 +2,7 @@ package service
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
+	"pjweb/internal/repository"
 )
 
 const (
@@ -13,30 +12,35 @@ const (
 	PJCompilerTypePrefix string = "compiler_type="
 )
 
+type SubmitService struct {
+	ProblemRepo    *repository.ProblemRepo
+	SubmitRepo     *repository.SubmitRepo
+	DatabaseRepo   *repository.DatabaseRepo
+	MaxRequestSize int64
+}
+
 type Submission struct {
-	Id           uint32
-	ProblemId    uint32
+	Id           int
+	ProblemId    int
 	CompilerType int32
 	Source       string
 }
 
-func (svc *Service) Submit(sub *Submission) (int32, error) {
-	problemDirectory := filepath.Join(svc.Problem.BasePath, strconv.Iota(sub.ProblemId))
-
-	stat, err := os.Stat(problemDirectory)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, errors.New("no problem dir")
-		}
-		return nil, err
-	}
-	if !stat.IsDir() {
-		return nil, errors.New("no problem dir")
+func NewSubmit(subRepo *repository.SubmitRepo, proRepo *repository.ProblemRepo, dbRepo *repository.DatabaseRepo) (*SubmitService, error) {
+	if subRepo == nil || proRepo == nil || dbRepo == nil {
+		return nil, errors.New("miss arguments")
 	}
 
-	/*
-		push into db
-		send to pj
-		ret
-	*/
+	return &SubmitService{
+		ProblemRepo:    proRepo,
+		SubmitRepo:     subRepo,
+		DatabaseRepo:   dbRepo,
+		MaxRequestSize: 64 * 1024, // 64kb
+	}, nil
+}
+
+func (svc *SubmitService) Submit(problem_id int, compiler_type int, source string) error {
+	if !svc.ProblemRepo.DirExist(problem_id) {
+		return errors.New("no problem dir")
+	}
 }

@@ -1,17 +1,23 @@
 package api
 
 import (
+	"errors"
 	"net/http"
-	"pjweb/internal/config"
+	"pjweb/internal/service"
 )
 
-type Service struct {
-	Problem ProblemService
-	Static  StaticService
+type Router struct {
+	Problem Problem
+	Submit  Submit
+	Static  Static
 }
 
-func NewMux(svc *Service) http.Handler {
+func NewMux(router *Router) http.Handler {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("/prob", router.Problem.Handler)
+	mux.HandleFunc("/submit", router.Submit.Handler)
+	m
 
 	mux.HandleFunc("/problem", svc.Problem.Handler)
 	mux.HandleFunc("/", svc.Static.Handler)
@@ -19,15 +25,18 @@ func NewMux(svc *Service) http.Handler {
 	return mux
 }
 
-func NewRouterService(cfg *config.Config) (*Service, error) {
-	var svc Service
+func NewRouter(
+	proSvc *service.ProblemService,
+	subSvc *service.SubmitService,
+	staticSvc *service.StaticService,
+) (*Router, error) {
+	if proSvc == nil || subSvc == nil || staticSvc == nil {
+		return nil, errors.New("miss service")
+	}
 
-	svc.Problem.BasePath = cfg.Problem.BasePath
-	svc.Problem.CasePrefix = cfg.Problem.CasePrefix
-	svc.Problem.CaseSuffix = cfg.Problem.CaseSuffix
-	svc.Problem.ExplanationName = cfg.Problem.ExplanationName
-
-	svc.Static.BasePath = cfg.Static.BasePath
-
-	return &svc, nil
+	return &Router{
+		Problem: NewProblem(proSvc),
+		Submit:  NewSubmit(subSvc),
+		Static:  NewStatic(staticSvc),
+	}, nil
 }

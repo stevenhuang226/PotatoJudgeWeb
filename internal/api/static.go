@@ -2,45 +2,33 @@ package api
 
 import (
 	"io"
-	"mime"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
+	"pjweb/internal/service"
 )
 
-type StaticService struct {
-	BasePath string
+type Static struct {
+	Service *service.StaticService
 }
 
-func (svc *StaticService) Handler(res http.ResponseWriter, req *http.Request) {
-	userPath := strings.TrimPrefix(req.URL.Path, svc.BasePath)
-	cleanPath := filepath.Clean(userPath)
-	fullPath := filepath.Join(svc.BasePath, cleanPath)
+func NewStatic(staticSvc *service.StaticService) (*Static, error) {
+	return &Static{
+		Service: staticSvc,
+	}, nil
+}
 
-	baseAbs, _ := filepath.Abs(svc.BasePath)
-	fullAbs, _ := filepath.Abs(fullPath)
+func (svc *Static) Handler(res http.ResponseWriter, req *http.Request) {
+	path := req.URL.Path
 
-	if !strings.HasPrefix(fullAbs, baseAbs) {
-		http.NotFound(res, req)
-		return
-	}
+	file, err := svc.Service.CheckAndGetFile(path)
 
-	fileHandle, err := os.Open(fullAbs)
 	if err != nil {
 		http.NotFound(res, req)
 		return
 	}
-	defer fileHandle.Close()
 
-	ext := filepath.Ext(fullAbs)
-	contentType := mime.TypeByExtension(ext)
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
+	defer file.Data.Close()
+	res.Header().Set("Content-Type", file.ContentType)
+	res.Header().Set("Content-Length", file.Size)
 
-	res.Header().Set("Content-Type", contentType)
-	res.WriteHeader(http.StatusOK)
-
-	io.Copy(res, fileHandle)
+	io.Copy(res, file.Data)
 }

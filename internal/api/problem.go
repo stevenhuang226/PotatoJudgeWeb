@@ -3,58 +3,60 @@ package api
 import (
 	"io"
 	"net/http"
+	"pjweb/internal/repository"
 	"pjweb/internal/service"
 	"strconv"
 )
 
-func (svc *service.Service) ProblemHandler(res http.ResponseWriter, req *http.Request) {
+type Problem struct {
+	Service *service.ProblemService
+}
+
+func NewProblem(proSvc *service.ProblemService) (*Problem, error) {
+	return &Problem{
+		Service: proSvc,
+	}, nil
+}
+
+func (svc *Problem) Handler(res http.ResponseWriter, req *http.Request) {
 	kind := req.URL.Query().Get("kind")
 	idStr := req.URL.Query().Get("id")
 	caseIdStr := req.URL.Query().Get("case_id")
 
 	id, err := strconv.Atoi(idStr)
-	caseId, err := strconv.Atoi(caseIdStr)
-
-	if kind == "explanation" {
-		/* is explanation */
-		file, err := svc.Problem.GetExplanation(id)
-		if err != nil {
-			http.NotFound(res, req)
-			return
-		}
-		defer file.Data.Close()
-
-		res.Header().Set("Content-Type", "text/plain")
-		res.Header().Set("Content-Length", strconv.FormatInt(file.Size, 10))
-
-		io.Copy(res, file.Data)
-	} else if kind == "cases_in" {
-		/* case in */
-		file, err := svc.Problem.GetInCase(id, caseId)
-		if err != nil {
-			http.NotFound(res, req)
-			return
-		}
-		defer file.Data.Close()
-
-		res.Header().Set("Content-Type", "application/octet-stream")
-		res.Header().Set("Content-Length", strconv.FormatInt(file.Size, 10))
-
-		io.Copy(res, file.Data)
-	} else if kind == "case_out" {
-		/* case out */
-		file, err := svc.Problem.GetOutCase(id, caseId)
-		if err != nil {
-			http.NotFound(res, req)
-			return
-		}
-		defer file.Data.Close()
-
-		res.Header().Set("Content-Type", "application/octet-stream")
-		res.Header().Set("Content-Length", strconv.FormatInt(file.Size, 10))
-
-		io.Copy(res, file.Data)
-	} else {
-		http.Error(res, "variable issues", http.StatusBadRequest)
+	if err != nil {
+		http.Error(
+			res,
+			"invalid id",
+			http.StatusBadRequest,
+		)
+		return
 	}
+
+	caseId, err := strconv.Atoi(caseIdStr)
+	if caseIdStr != "" && err != nil {
+		http.Error(
+			res,
+			"invalid case id",
+			http.StatusBadRequest,
+		)
+		return
+	}
+
+	var file *repository.FileData
+	var err error
+
+	file, err = svc.Service.GetFile(kind, id, caseId)
+
+	if err != nil {
+		http.NotFound(res, req)
+		return
+	}
+
+	defer file.Data.Close()
+
+	res.Header().Set("Content-Type", file.ContentType)
+	res.Header().Set("Content-Length", strconv.Itoa(file.Size))
+
+	io.Copy(res, file.Data)
 }

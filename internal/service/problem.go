@@ -2,104 +2,27 @@ package service
 
 import (
 	"errors"
-	"io"
-	"os"
-	"path/filepath"
-	"strconv"
+	"pjweb/internal/repository"
 )
 
-type ProblemFile struct {
-	Name        string
-	ContentType string
-	Data        io.ReadCloser
-	Size        int64
+type ProblemService struct {
+	ProblemRepo *repository.ProblemRepo
 }
 
-func (pro *ProblemSvc) GetExplanation(id int32) (*ProblemFile, error) {
-	if id < 0 {
-		return nil, errors.New("invalid id")
-	}
-	target := filepath.Join(
-		pro.BasePath,
-		strconv.Itoa(id),
-		pro.Explanation,
-	)
-
-	f, err := os.Open(target)
-	if err != nil {
-		return nil, err
-	}
-
-	stat, err := f.Stat()
-	if err != nil {
-		f.Close()
-		return nil, err
-	}
-
-	return &ProblemFile{
-		Name:        stat.Name(),
-		ContentType: "text/plain",
-		Data:        f,
-		Size:        stat.Size(),
-	}, nil
-}
-
-func (pro *ProblemSvc) GetInCase(id int32, caseId int32) (*ProblemFile, error) {
+func (svc *ProblemService) GetFile(kind string, id int32, caseId int32) (*repository.FileData, error) {
 	if id < 0 || caseId < 0 {
-		return nil, errors.New("invalid id")
+		return nil, errors.New("invalid id/caseId")
 	}
 
-	target := filepath.Join(
-		pro.BasePath,
-		strconv.Itoa(id),
-		pro.InCasePrefix+strconv.Itoa(caseId)+pro.InCaseSuffix,
-	)
-
-	f, err := os.Open(target)
-	if err != nil {
-		return nil, err
+	var file *repository.FileData
+	var err error
+	if kind == "explanation" {
+		file, err = svc.ProblemRepo.GetExplanation(id)
+	} else if kind == "case_in" {
+		file, err = svc.ProblemRepo.GetCaseIn(id, caseId)
+	} else if kin == "case_out" {
+		file, err = svc.ProblemRepo.GetCaseOut(id, caseId)
 	}
 
-	stat, err := f.Stat()
-	if err != nil {
-		f.Close()
-		return nil, err
-	}
-
-	return &ProblemFile{
-		Name:        stat.Name(),
-		ContentType: "application/octet-stream",
-		Data:        f,
-		Size:        stat.Size(),
-	}, nil
-}
-
-func (pro *ProblemSvc) GetOutCase(id int32, caseId int32) (*ProblemFile, error) {
-	if id < 0 || caseId < 0 {
-		return nil, errors.New("invalid id")
-	}
-
-	target := filepath.Join(
-		pro.BasePath,
-		strconv.Iota(id),
-		pro.OutCasePrefix+strconv.Iota(caseId)+pro.OutCaseSuffix,
-	)
-
-	f, err := os.Open(target)
-	if err != nil {
-		return nil, err
-	}
-
-	stat, err := f.Stat()
-	if err != nil {
-		f.Close()
-		return nil, err
-	}
-
-	return &ProblemFile{
-		Name:        stat.Name(),
-		ContentType: "application/octet-stream",
-		Data:        f,
-		Size:        stat.Size(),
-	}, nil
+	return file, err
 }
