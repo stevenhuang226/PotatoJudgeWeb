@@ -27,17 +27,19 @@ type ProblemConfig struct {
 }
 
 type SubmitConfig struct {
-	BasePath           string `yaml:"path"`
-	SocketPath         string `yaml:"socket"`
-	MaxQueueSize       int32  `yaml:"maxQueueSize"`
-	MaxConcurrentJudge int32  `yaml:"maxConcurrent"`
+	BasePath             string `yaml:"path"`
+	SocketPath           string `yaml:"socket"`
+	MaxQueueSize         int32  `yaml:"maxQueueSize"`
+	MaxConcurrentJudge   int32  `yaml:"maxConcurrent"`
+	PJCompilerTypePrefix string `yaml:"compiler_type_prefix"`
+	PJDetailName         string `yaml:"detail_name"`
 }
 
 type DatabaseConfig struct {
 	DSN             string        `yaml:"dsn"`
 	MaxOpenConns    int           `yaml:"max_open_conns"`
 	MaxIdleConns    int           `yaml:"max_idle_conns"`
-	MaxConnLifetime time.Duration `yaml:"conn_max_lifetime"`
+	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime"`
 }
 
 type ServerConfig struct {

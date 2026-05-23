@@ -3,7 +3,11 @@ package app
 import (
 	"database/sql"
 	"errors"
+	"pjweb/internal/app"
 	"pjweb/internal/config"
+	"pjweb/internal/db"
+	"pjweb/internal/repository"
+	"pjweb/internal/service"
 )
 
 type App struct {
@@ -12,6 +16,15 @@ type App struct {
 	Submit   Submit
 	Static   Static
 	Database Database
+
+	ProblemSvc *service.ProblemService
+	SubmitSvc  *service.SubmitService
+	StaticSvc  *service.StaticService
+
+	ProblemRepo  *repository.ProblemRepo
+	SubmitRepo   *repository.SubmitRepo
+	StaticRepo   *repository.StaticRepo
+	DatabaseRepo *repository.DatabaseRepo
 }
 
 type Problem struct {
@@ -24,12 +37,12 @@ type Problem struct {
 }
 
 type Submit struct {
-	BasePath           string
-	SocketPath         string
-	MaxQueueSize       int32
-	MaxConcurrentJudge int32
-	PJCompilerPrefix   string
-	PJDetailName       string
+	BasePath             string
+	SocketPath           string
+	MaxQueueSize         int32
+	MaxConcurrentJudge   int32
+	PJCompilerTypePrefix string
+	PJDetailName         string
 }
 
 type Database struct {
@@ -47,57 +60,21 @@ func New(cfg *config.Config) (*App, error) {
 
 	var app App
 
-	app.Debug = cfg.Debug
-
-	/* problem */
-	if cfg.Problem.BasePath == "" {
-		return nil, errors.New("no problem path")
-	}
-	app.Problem.BasePath = cfg.Problem.BasePath
-	if cfg.Problem.InCasePrefix != "" {
-		app.Problem.InCasePrefix = cfg.Problem.InCasePrefix
-	} else {
-		app.Problem.InCasePrefix = "input"
-	}
-	if cfg.Problem.InCaseSuffix != "" {
-		app.Problem.InCaseSuffix = cfg.Problem.InCaseSuffix
-	} else {
-		app.Problem.InCaseSuffix = ".bin"
-	}
-	if cfg.Problem.OutCasePrefix != "" {
-		app.Problem.OutCasePrefix = cfg.Problem.OutCasePrefix
-	} else {
-		app.Problem.OutCasePreifx = "output"
-	}
-	if cfg.Problem.OutCaseSuffix != "" {
-		app.Problem.OutCaseSuffix = cfg.Problem.OutCaseSuffix
-	} else {
-		app.Problem.OutCaseSuffix = ".bin"
+	err := app.SetFromConfig(cfg)
+	if err != nil {
+		return nil, err
 	}
 
-	/* submit */
-	if cfg.Submit.BasePath == "" || cfg.Submit.SocketPath == "" {
-		return nil, errors.New("no submit/socket path")
-	}
-	app.Submit.BasePath = cfg.Submit.BasePath
-	app.Submit.SocketPath = cfg.Submit.SocketPath
-	app.Submit.PJCompilerPrefix = "compiler_type="
-	if cfg.Submit.MaxConcurrentJudge > 0 {
-		app.Submit.MaxQueueSize = cfg.Submit.MaxConcurrentJudge
-	} else {
-		app.Submit.MaxQueueSize = 128
-	}
-	if cfg.Submit.MaxConcurrentJudge > 0 {
-		app.Submit.MaxConcurrentJudge = cfg.Submit.MaxConcurrentJudge
-	} else {
-		app.Submit.MaxConcurrentJudge = 8
+	app.Database.Conn, err := db.SetUpDB(
+		cfg.Database.DSN,
+		cfg.Database.MaxOpenConns,
+		cfg.Database.MaxIdleConns,
+		cfg.Database.ConnMaxLifetime,
+	)
+
+	if err != nil {
+		return nil, err
 	}
 
-	/* static */
-	if cfg.Static.BasePath == "" {
-		return nil, errros.New("no static path")
-	}
-	app.Static.BasePath = cfg.Static.BasePath
-
-	return &app
+	return &app, nil
 }
