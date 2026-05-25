@@ -28,7 +28,7 @@ type Submission struct {
 
 func NewSubmit(subRepo *repository.SubmitRepo, proRepo *repository.ProblemRepo, dbRepo *repository.DatabaseRepo) (*SubmitService, error) {
 	if subRepo == nil || proRepo == nil || dbRepo == nil {
-		return nil, errors.New("miss arguments")
+		return nil, errors.New("miss repo")
 	}
 
 	return &SubmitService{

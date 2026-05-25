@@ -12,7 +12,7 @@ type StaticRepo struct {
 	BasePath string
 }
 
-func NewStaticRepo(static *app.Static) (*StaticRepo, error) {
+func NewStatic(static *app.Static) (*StaticRepo, error) {
 	if static == nil {
 		return nil, errors.New("no static")
 	}

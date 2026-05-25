@@ -22,7 +22,7 @@ type PJCSubmissionStruct struct {
 	problem_id    uint32
 }
 
-func NewSubmig(sub *app.Submit) (*SubmitRepo, error) {
+func NewSubmit(sub *app.Submit) (*SubmitRepo, error) {
 	var repo SubmitRepo
 
 	repo.BasePath = sub.BasePath

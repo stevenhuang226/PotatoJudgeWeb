@@ -3,7 +3,7 @@ package app
 import (
 	"database/sql"
 	"errors"
-	"pjweb/internal/app"
+	"pjweb/internal/api"
 	"pjweb/internal/config"
 	"pjweb/internal/db"
 	"pjweb/internal/repository"
@@ -16,6 +16,7 @@ type App struct {
 	Submit   Submit
 	Static   Static
 	Database Database
+	Server   Server
 
 	ProblemSvc *service.ProblemService
 	SubmitSvc  *service.SubmitService
@@ -25,6 +26,8 @@ type App struct {
 	SubmitRepo   *repository.SubmitRepo
 	StaticRepo   *repository.StaticRepo
 	DatabaseRepo *repository.DatabaseRepo
+
+	Router *api.Router
 }
 
 type Problem struct {
@@ -53,6 +56,11 @@ type Static struct {
 	BasePath string
 }
 
+type Server struct {
+	Port uint16
+	Host string
+}
+
 func New(cfg *config.Config) (*App, error) {
 	if cfg == nil {
 		return nil, errors.New("no cfg")
@@ -65,7 +73,7 @@ func New(cfg *config.Config) (*App, error) {
 		return nil, err
 	}
 
-	app.Database.Conn, err := db.SetUpDB(
+	app.Database.Conn, err = db.SetUpDB(
 		cfg.Database.DSN,
 		cfg.Database.MaxOpenConns,
 		cfg.Database.MaxIdleConns,

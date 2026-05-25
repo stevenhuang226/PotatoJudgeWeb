@@ -12,7 +12,7 @@ type Router struct {
 	Static  Static
 }
 
-func NewMux(router *Router) http.Handler {
+func (router *Router) NewMux() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/prob", router.Problem.Handler)
