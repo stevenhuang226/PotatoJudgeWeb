@@ -44,7 +44,6 @@ func (svc *Problem) Handler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	var file *repository.FileData
-	var err error
 
 	file, err = svc.Service.GetFile(kind, id, caseId)
 
@@ -56,7 +55,7 @@ func (svc *Problem) Handler(res http.ResponseWriter, req *http.Request) {
 	defer file.Data.Close()
 
 	res.Header().Set("Content-Type", file.ContentType)
-	res.Header().Set("Content-Length", strconv.Itoa(file.Size))
+	res.Header().Set("Content-Length", strconv.Itoa(int(file.Size)))
 
 	io.Copy(res, file.Data)
 }

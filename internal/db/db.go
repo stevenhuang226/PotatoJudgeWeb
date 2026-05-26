@@ -21,7 +21,7 @@ func SetUpDB(
 
 	maxOpenConns := 16
 	maxIdleConns := 8
-	connMaxLifetime := time.hour
+	connMaxLifetime := time.Hour
 
 	if _maxOpenConns > 0 {
 		maxOpenConns = _maxOpenConns
@@ -53,5 +53,5 @@ func SetUpDB(
 		return nil, err
 	}
 
-	return &conn, nil
+	return conn, nil
 }

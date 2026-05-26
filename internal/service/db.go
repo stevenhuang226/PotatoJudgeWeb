@@ -1,7 +1,7 @@
 package service
 
-import "pjweb/internal/app"
+import "pjweb/internal/repository"
 
 type DatabaseService struct {
-	Database *app.Database
+	DatabaseRepo *repository.DatabaseRepo
 }

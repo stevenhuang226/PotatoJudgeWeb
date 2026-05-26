@@ -8,11 +8,13 @@ import (
 	"strconv"
 )
 
+/*
 const (
 	MaxRequestSize  int64 = 64 * 1024 // 64Kb
 	MinCompilerType       = 1
 	MaxCompilerType       = 2
 )
+*/
 
 type Submit struct {
 	Service *service.SubmitService
@@ -30,7 +32,7 @@ domain/submit?problem_id=<id>&compiler_type=<id>
 */
 
 func (svc *Submit) Handler(res http.ResponseWriter, req *http.Request) {
-	req.Body = http.MaxBytesREader(res, req.Body, svc.MaxRequestSize)
+	req.Body = http.MaxBytesReader(res, req.Body, svc.Service.MaxRequestSize)
 
 	reqBody, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -65,7 +67,7 @@ func (svc *Submit) Handler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := svc.Service.Submit(problemId, compilerType, string(reqBody))
+	err = svc.Service.Submit(problemId, compilerType, string(reqBody))
 
 	if err != nil {
 		http.Error(res, "submit failed", http.StatusBadRequest)

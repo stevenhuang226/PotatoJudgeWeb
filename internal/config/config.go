@@ -9,12 +9,17 @@ import (
 )
 
 type Config struct {
-	Debug    bool           `yaml:"debug"`
+	Debug    Debug          `yaml:"debug"`
 	Problem  ProblemConfig  `yaml:"problem"`
 	Submit   SubmitConfig   `yaml:"submit"`
 	Database DatabaseConfig `yaml:"database"`
 	Server   ServerConfig   `yaml:"server"`
 	Static   StaticConfig   `yaml:"static"`
+}
+
+type Debug struct {
+	IsDebug bool `yaml:"isdebug"`
+	UseDB   bool `yaml:"use_db"`
 }
 
 type ProblemConfig struct {

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"errors"
+	"log"
 	"net/http"
 	"pjweb/internal/api"
 	"pjweb/internal/repository"
@@ -10,19 +10,44 @@ import (
 )
 
 func (app *App) Run() error {
-	app.ProblemRepo, err = repository.NewProblem(app.Problem)
+	var err error
+
+	app.ProblemRepo, err = repository.NewProblemRepo(
+		app.Problem.BasePath,
+		app.Problem.Explanation,
+		app.Problem.InCasePrefix,
+		app.Problem.InCaseSuffix,
+		app.Problem.OutCasePrefix,
+		app.Problem.OutCaseSuffix,
+	)
 	if err != nil {
 		return err
 	}
-	app.SubmitRepo, err = repository.NewSubmit(app.Submit)
-	if err != nil {
+
+	app.SubmitRepo, err = repository.NewSubmitRepo(
+		app.Submit.BasePath,
+		app.Submit.SocketPath,
+		app.Submit.MaxQueueSize,
+		app.Submit.MaxConcurrentJudge,
+	)
+	if err != nil && app.SubmitRepo == nil {
 		return err
 	}
-	app.DatabaseRepo, err = repository.NewDatabase(app.Database)
-	if err != nil {
-		return err
+
+	/* debug */
+	if !app.Debug.IsOn || app.Debug.UseDB {
+		app.DatabaseRepo, err = repository.NewDatabaseRepo(app.Database.Conn)
+		if err != nil {
+			return err
+		}
+	} else {
+		app.DatabaseRepo = nil
 	}
-	app.StaticRepo, err = repository.NewStatic(app.Static)
+	/* end debug */
+
+	app.StaticRepo, err = repository.NewStaticRepo(
+		app.Static.BasePath,
+	)
 	if err != nil {
 		return err
 	}
@@ -49,9 +74,9 @@ func (app *App) Run() error {
 		return err
 	}
 
-	mux := app.Router.NewMux()
-	if mux == nil {
-		return errors.New("no mux")
+	mux, err := app.Router.NewMux()
+	if err != nil {
+		return err
 	}
 
 	server := &http.Server{
@@ -59,6 +84,11 @@ func (app *App) Run() error {
 		Handler: mux,
 	}
 
-	server.ListenAndServe()
-	app.Database.Conn.Close()
+	log.Fatal(server.ListenAndServe())
+
+	if !app.Debug.IsOn || app.Debug.UseDB {
+		app.Database.Conn.Close()
+	}
+
+	return nil
 }

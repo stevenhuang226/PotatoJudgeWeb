@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"pjweb/internal/service"
+	"strconv"
 )
 
 type Static struct {
@@ -28,7 +29,7 @@ func (svc *Static) Handler(res http.ResponseWriter, req *http.Request) {
 
 	defer file.Data.Close()
 	res.Header().Set("Content-Type", file.ContentType)
-	res.Header().Set("Content-Length", file.Size)
+	res.Header().Set("Content-Length", strconv.Itoa(int(file.Size)))
 
 	io.Copy(res, file.Data)
 }

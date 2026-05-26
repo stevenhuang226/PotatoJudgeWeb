@@ -22,7 +22,7 @@ func NewStatic(static *repository.StaticRepo) (*StaticService, error) {
 }
 
 func (svc *StaticService) CheckAndGetFile(userPath string) (*repository.FileData, error) {
-	baseAbsPath := filepath.Abs(svc.StaticRepo.BasePath)
+	baseAbsPath, _ := filepath.Abs(svc.StaticRepo.BasePath)
 
 	cleanPath := filepath.Clean(userPath)
 	fullAbsPath := filepath.Join(baseAbsPath, cleanPath)

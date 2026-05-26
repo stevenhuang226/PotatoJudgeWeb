@@ -10,7 +10,15 @@ func (app *App) SetFromConfig(cfg *config.Config) error {
 		return errors.New("no config")
 	}
 
-	app.Debug = cfg.Debug
+	/* debug */
+	if cfg.Debug.IsDebug {
+		app.Debug.UseDB = true
+		if cfg.Debug.UseDB {
+			app.Debug.UseDB = cfg.Debug.UseDB
+		}
+	} else {
+		app.Debug.IsOn = false
+	}
 
 	/* problem */
 
@@ -70,6 +78,13 @@ func (app *App) SetFromConfig(cfg *config.Config) error {
 	}
 
 	app.Static.BasePath = cfg.Static.BasePath
+
+	/* server */
+	app.Server.Port = 8080
+	app.Server.Host = cfg.Server.Host
+	if cfg.Server.Port != 0 {
+		app.Server.Port = cfg.Server.Port
+	}
 
 	return nil
 }

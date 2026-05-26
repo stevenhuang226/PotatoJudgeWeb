@@ -3,7 +3,6 @@ package repository
 import (
 	"os"
 	"path/filepath"
-	"pjweb/internal/app"
 	"strconv"
 )
 
@@ -16,20 +15,25 @@ type ProblemRepo struct {
 	CaseOutSuffix string
 }
 
-func NewProblem(pro *app.Problem) (*ProblemRepo, error) {
-	var repo ProblemRepo
-
-	repo.BasePath = pro.BasePath
-	repo.Explanation = pro.Explanation
-	repo.CaseInPrefix = pro.InCasePrefix
-	repo.CaseInSuffix = pro.InCaseSuffix
-	repo.CaseOutPrefix = pro.OutCasePrefix
-	repo.CaseOutSuffix = pro.OutCaseSuffix
-
-	return &repo, nil
+func NewProblemRepo(
+	basePath string,
+	explanation string,
+	caseInPrefix string,
+	caseInSuffix string,
+	caseOutPrefix string,
+	caseOutSuffix string,
+) (*ProblemRepo, error) {
+	return &ProblemRepo{
+		BasePath:      basePath,
+		Explanation:   explanation,
+		CaseInPrefix:  caseInPrefix,
+		CaseInSuffix:  caseInSuffix,
+		CaseOutPrefix: caseOutPrefix,
+		CaseOutSuffix: caseOutSuffix,
+	}, nil
 }
 
-func (repo *ProblemRepo) GetExplanation(id int32) (*FileData, error) {
+func (repo *ProblemRepo) GetExplanation(id int) (*FileData, error) {
 	target := filepath.Join(
 		repo.BasePath,
 		strconv.Itoa(id),
@@ -55,7 +59,7 @@ func (repo *ProblemRepo) GetExplanation(id int32) (*FileData, error) {
 	}, nil
 }
 
-func (repo *ProblemRepo) GetCaseIn(id int32, caseId int32) (*FileData, error) {
+func (repo *ProblemRepo) GetCaseIn(id int, caseId int) (*FileData, error) {
 	target := filepath.Join(
 		repo.BasePath,
 		strconv.Itoa(id),
@@ -76,12 +80,12 @@ func (repo *ProblemRepo) GetCaseIn(id int32, caseId int32) (*FileData, error) {
 	return &FileData{
 		Name:        stat.Name(),
 		ContentType: "application/octet-stream",
-		File:        file,
+		Data:        file,
 		Size:        stat.Size(),
 	}, nil
 }
 
-func (repo *ProblemRepo) GetCaseOut(id int32, caseId int32) (*FileData, error) {
+func (repo *ProblemRepo) GetCaseOut(id int, caseId int) (*FileData, error) {
 	target := filepath.Join(
 		repo.BasePath,
 		strconv.Itoa(id),
@@ -102,15 +106,15 @@ func (repo *ProblemRepo) GetCaseOut(id int32, caseId int32) (*FileData, error) {
 	return &FileData{
 		Name:        stat.Name(),
 		ContentType: "application/octet-stream",
-		File:        file,
+		Data:        file,
 		Size:        stat.Size(),
 	}, nil
 }
 
-func (repo *ProblemRepo) DirExist(id int32) bool {
+func (repo *ProblemRepo) DirExist(id uint) bool {
 	target := filepath.Join(
 		repo.BasePath,
-		strconv.Itoa(id),
+		strconv.Itoa(int(id)),
 	)
 
 	stat, err := os.Stat(target)

@@ -11,7 +11,7 @@ import (
 )
 
 type App struct {
-	Debug    bool
+	Debug    Debug
 	Problem  Problem
 	Submit   Submit
 	Static   Static
@@ -28,6 +28,11 @@ type App struct {
 	DatabaseRepo *repository.DatabaseRepo
 
 	Router *api.Router
+}
+
+type Debug struct {
+	IsOn  bool
+	UseDB bool
 }
 
 type Problem struct {
@@ -72,6 +77,12 @@ func New(cfg *config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	/* debug section */
+	if cfg.Debug.IsDebug && !cfg.Debug.UseDB {
+		return &app, nil
+	}
+	/* debug section end */
 
 	app.Database.Conn, err = db.SetUpDB(
 		cfg.Database.DSN,

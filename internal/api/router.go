@@ -7,22 +7,21 @@ import (
 )
 
 type Router struct {
-	Problem Problem
-	Submit  Submit
-	Static  Static
+	Problem *Problem
+	Submit  *Submit
+	Static  *Static
 }
 
-func (router *Router) NewMux() http.Handler {
+func (router *Router) NewMux() (http.Handler, error) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/prob", router.Problem.Handler)
 	mux.HandleFunc("/submit", router.Submit.Handler)
-	m
 
-	mux.HandleFunc("/problem", svc.Problem.Handler)
-	mux.HandleFunc("/", svc.Static.Handler)
+	mux.HandleFunc("/problem", router.Problem.Handler)
+	mux.HandleFunc("/", router.Static.Handler)
 
-	return mux
+	return mux, nil
 }
 
 func NewRouter(
@@ -34,9 +33,23 @@ func NewRouter(
 		return nil, errors.New("miss service")
 	}
 
-	return &Router{
-		Problem: NewProblem(proSvc),
-		Submit:  NewSubmit(subSvc),
-		Static:  NewStatic(staticSvc),
-	}, nil
+	var router Router
+	var err error
+
+	router.Problem, err = NewProblem(proSvc)
+	if err != nil {
+		return nil, err
+	}
+
+	router.Submit, err = NewSubmit(subSvc)
+	if err != nil {
+		return nil, err
+	}
+
+	router.Static, err = NewStatic(staticSvc)
+	if err != nil {
+		return nil, err
+	}
+
+	return &router, nil
 }

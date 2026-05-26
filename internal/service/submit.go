@@ -40,7 +40,9 @@ func NewSubmit(subRepo *repository.SubmitRepo, proRepo *repository.ProblemRepo, 
 }
 
 func (svc *SubmitService) Submit(problem_id int, compiler_type int, source string) error {
-	if !svc.ProblemRepo.DirExist(problem_id) {
+	if !svc.ProblemRepo.DirExist(uint(problem_id)) {
 		return errors.New("no problem dir")
 	}
+
+	return nil
 }

@@ -11,11 +11,11 @@ type ProblemService struct {
 
 func NewProblem(proRepo *repository.ProblemRepo) (*ProblemService, error) {
 	return &ProblemService{
-		ProblemRepo: proRepo;
-	}, nil;
+		ProblemRepo: proRepo,
+	}, nil
 }
 
-func (svc *ProblemService) GetFile(kind string, id int32, caseId int32) (*repository.FileData, error) {
+func (svc *ProblemService) GetFile(kind string, id int, caseId int) (*repository.FileData, error) {
 	if id < 0 || caseId < 0 {
 		return nil, errors.New("invalid id/caseId")
 	}
@@ -26,7 +26,7 @@ func (svc *ProblemService) GetFile(kind string, id int32, caseId int32) (*reposi
 		file, err = svc.ProblemRepo.GetExplanation(id)
 	} else if kind == "case_in" {
 		file, err = svc.ProblemRepo.GetCaseIn(id, caseId)
-	} else if kin == "case_out" {
+	} else if kind == "case_out" {
 		file, err = svc.ProblemRepo.GetCaseOut(id, caseId)
 	}
 

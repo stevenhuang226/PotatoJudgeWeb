@@ -1,24 +1,20 @@
 package repository
 
 import (
-	"errors"
 	"mime"
 	"os"
 	"path/filepath"
-	"pjweb/internal/app"
 )
 
 type StaticRepo struct {
 	BasePath string
 }
 
-func NewStatic(static *app.Static) (*StaticRepo, error) {
-	if static == nil {
-		return nil, errors.New("no static")
-	}
-
+func NewStaticRepo(
+	basePath string,
+) (*StaticRepo, error) {
 	return &StaticRepo{
-		BasePath: static.BasePath,
+		BasePath: basePath,
 	}, nil
 }
 

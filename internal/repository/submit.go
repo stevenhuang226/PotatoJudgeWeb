@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"net"
-	"pjweb/internal/app"
 )
 
 type SubmitRepo struct {
@@ -22,21 +21,25 @@ type PJCSubmissionStruct struct {
 	problem_id    uint32
 }
 
-func NewSubmit(sub *app.Submit) (*SubmitRepo, error) {
-	var repo SubmitRepo
-
-	repo.BasePath = sub.BasePath
-	repo.SocketPath = sub.SocketPath
-	repo.MaxQueueSize = sub.MaxQueueSize
-	repo.MaxConcurrentJudge = sub.MaxConcurrentJudge
-	repo.PJCompilerPrefix = "compiler_type="
-	repo.PJDetailName = "detail.conf"
+func NewSubmitRepo(
+	basePath string,
+	socketPath string,
+	maxQueueSize int32,
+	maxConcurrentJudge int32,
+) (*SubmitRepo, error) {
+	repo := SubmitRepo{
+		BasePath:           basePath,
+		SocketPath:         socketPath,
+		MaxQueueSize:       maxQueueSize,
+		MaxConcurrentJudge: maxConcurrentJudge,
+		PJCompilerPrefix:   "compiler_type=",
+		PJDetailName:       "detail.conf",
+	}
 
 	err := repo.InitPJConn()
 	if err != nil {
-		return &repo, errors.New("init pj socket conn failed")
+		return &repo, errors.New("init pj conn failed")
 	}
-
 	return &repo, nil
 }
 
