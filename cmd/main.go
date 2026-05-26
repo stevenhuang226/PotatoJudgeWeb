@@ -2,40 +2,21 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"pjweb/internal/api"
+	"pjweb/internal/app"
 	"pjweb/internal/config"
-	"pjweb/internal/db"
 )
 
 func main() {
-	applicationConfig, err := config.LoadConfig("../config.yaml")
+	config, err := config.LoadConfig("../config.test.yaml")
 	if err != nil {
-		fmt.Print("config error\n")
+		fmt.Printf("config error\n")
 		return
 	}
 
-	db, err := db.New(&applicationConfig.Database)
+	app, err := app.New(config)
+
+	err = app.Run()
 	if err != nil {
-		fmt.Print("db init error\n")
-		fmt.Print(err)
-		return
+		fmt.Printf("app fun failed")
 	}
-
-	routerService, err := api.NewRouterService(applicationConfig)
-	if err != nil {
-		fmt.Print("service error\n")
-		return
-	}
-	router := api.NewMux(routerService)
-
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: router,
-	}
-
-	log.Fatal(server.ListenAndServe())
-
-	db.Conn.Close()
 }

@@ -1,95 +1,61 @@
 package api
 
 import (
+	"io"
 	"net/http"
-	"os"
-	"path/filepath"
+	"pjweb/internal/repository"
+	"pjweb/internal/service"
 	"strconv"
 )
 
-type ProblemService struct {
-	BasePath        string
-	ExplanationName string
-	CasePrefix      string
-	CaseSuffix      string
+type Problem struct {
+	Service *service.ProblemService
 }
 
-/*
-the url will be like:
-domain/problem?id=<id>&kind=explanation
-domain/problem?id=<id>&kind=test_cases&case_id=<case_id>
-*/
+func NewProblem(proSvc *service.ProblemService) (*Problem, error) {
+	return &Problem{
+		Service: proSvc,
+	}, nil
+}
 
-func (svc *ProblemService) Handler(res http.ResponseWriter, req *http.Request) {
-	const (
-		KindExplanation string = "explanation"
-		KindTestCases   string = "test_cases"
-		KindErrorMsg    string = "invalid kind"
-	)
-
+func (svc *Problem) Handler(res http.ResponseWriter, req *http.Request) {
 	kind := req.URL.Query().Get("kind")
-
-	switch kind {
-	case KindExplanation:
-		svc.ExplanationHandler(res, req)
-	case KindTestCases:
-		svc.TestCasesHandler(res, req)
-	default:
-		http.NotFound(res, req)
-		return
-	}
-}
-
-func (svc *ProblemService) ExplanationHandler(res http.ResponseWriter, req *http.Request) {
-	idStr := req.URL.Query().Get("id")
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id < 0 {
-		http.NotFound(res, req)
-		return
-	}
-
-	target := filepath.Join(svc.BasePath, strconv.Itoa(id), svc.ExplanationName)
-
-	data, err := os.ReadFile(target)
-	if err != nil {
-		http.NotFound(res, req)
-		return
-	}
-
-	res.Header().Set("Content-Type", "text/plain")
-	res.Write(data)
-
-	return
-}
-
-func (svc *ProblemService) TestCasesHandler(res http.ResponseWriter, req *http.Request) {
 	idStr := req.URL.Query().Get("id")
 	caseIdStr := req.URL.Query().Get("case_id")
 
 	id, err := strconv.Atoi(idStr)
-	if err != nil || id < 0 {
-		http.NotFound(res, req)
+	if err != nil {
+		http.Error(
+			res,
+			"invalid id",
+			http.StatusBadRequest,
+		)
 		return
 	}
 
 	caseId, err := strconv.Atoi(caseIdStr)
-	if err != nil || caseId < 0 {
-		http.NotFound(res, req)
+	if caseIdStr != "" && err != nil {
+		http.Error(
+			res,
+			"invalid case id",
+			http.StatusBadRequest,
+		)
 		return
 	}
 
-	fileName := svc.CasePrefix + strconv.Itoa(caseId) + svc.CaseSuffix
-	target := filepath.Join(svc.BasePath, strconv.Itoa(id), fileName)
+	var file *repository.FileData
 
-	data, err := os.ReadFile(target)
+	file, err = svc.Service.GetFile(kind, id, caseId)
+
 	if err != nil {
 		http.NotFound(res, req)
 		return
 	}
 
-	res.Header().Set("Content-Type", "application/octet-stream")
-	res.Write(data)
+	defer file.Data.Close()
 
-	return
+	res.Header().Set("Content-Type", file.ContentType)
+	res.Header().Set("Content-Length", strconv.Itoa(int(file.Size)))
+
+	io.Copy(res, file.Data)
 }

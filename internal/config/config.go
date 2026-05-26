@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	Debug    bool           `yaml:"debug"`
+	Debug    Debug          `yaml:"debug"`
 	Problem  ProblemConfig  `yaml:"problem"`
 	Submit   SubmitConfig   `yaml:"submit"`
 	Database DatabaseConfig `yaml:"database"`
@@ -17,24 +17,34 @@ type Config struct {
 	Static   StaticConfig   `yaml:"static"`
 }
 
+type Debug struct {
+	IsDebug bool `yaml:"isdebug"`
+	UseDB   bool `yaml:"use_db"`
+}
+
 type ProblemConfig struct {
 	BasePath        string `yaml:"path"`
 	ExplanationName string `yaml:"explanation"`
-	CasePrefix      string `yaml:"case_prefix"`
-	CaseSuffix      string `yaml:"case_suffix"`
+	InCasePrefix    string `yaml:"case_prefix_in"`
+	InCaseSuffix    string `yaml:"case_suffix_in"`
+	OutCasePrefix   string `yaml:"case_prefix_out"`
+	OutCaseSuffix   string `yaml:"case_suffix_out"`
 }
 
 type SubmitConfig struct {
-	BasePath           string `yaml:"path"`
-	SocketPath         string `yaml:"socket"`
-	MaxConcurrentJudge uint16 `yaml:"maxConcurrent"`
+	BasePath             string `yaml:"path"`
+	SocketPath           string `yaml:"socket"`
+	MaxQueueSize         int32  `yaml:"maxQueueSize"`
+	MaxConcurrentJudge   int32  `yaml:"maxConcurrent"`
+	PJCompilerTypePrefix string `yaml:"compiler_type_prefix"`
+	PJDetailName         string `yaml:"detail_name"`
 }
 
 type DatabaseConfig struct {
 	DSN             string        `yaml:"dsn"`
 	MaxOpenConns    int           `yaml:"max_open_conns"`
 	MaxIdleConns    int           `yaml:"max_idle_conns"`
-	MaxConnLifetime time.Duration `yaml:"conn_max_lifetime"`
+	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime"`
 }
 
 type ServerConfig struct {

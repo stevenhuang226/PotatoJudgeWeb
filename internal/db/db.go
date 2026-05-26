@@ -4,50 +4,43 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"pjweb/internal/config"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-type Database struct {
-	Conn *sql.DB
-}
-
-func New(cfg *config.DatabaseConfig) (*Database, error) {
-	if cfg == nil {
-		return nil, errors.New("nil DatabaseConfig")
+func SetUpDB(
+	dsn string,
+	_maxOpenConns int,
+	_maxIdleConns int,
+	_connMaxLifetime time.Duration,
+) (*sql.DB, error) {
+	if dsn == "" {
+		return nil, errors.New("no dsn")
 	}
 
-	const (
-		DefMaxOpenConns    int           = 16
-		DefMaxIdleConns    int           = 8
-		DefConnMaxLifetime time.Duration = time.Hour
-	)
-	MaxOpenConns := cfg.MaxOpenConns
-	if MaxOpenConns <= 0 {
-		MaxOpenConns = DefMaxOpenConns
+	maxOpenConns := 16
+	maxIdleConns := 8
+	connMaxLifetime := time.Hour
+
+	if _maxOpenConns > 0 {
+		maxOpenConns = _maxOpenConns
 	}
-	MaxIdleConns := cfg.MaxIdleConns
-	if MaxIdleConns <= 0 {
-		MaxIdleConns = DefMaxIdleConns
+	if _maxIdleConns > 0 {
+		maxIdleConns = _maxIdleConns
 	}
-	ConnMaxLifetime := cfg.MaxConnLifetime
-	if ConnMaxLifetime <= 0 {
-		ConnMaxLifetime = DefConnMaxLifetime
+	if _connMaxLifetime > 0 {
+		connMaxLifetime = _connMaxLifetime
 	}
 
-	conn, err := sql.Open(
-		"pgx",
-		cfg.DSN,
-	)
+	conn, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	conn.SetMaxOpenConns(MaxOpenConns)
-	conn.SetMaxIdleConns(MaxIdleConns)
-	conn.SetConnMaxLifetime(ConnMaxLifetime)
+	conn.SetMaxOpenConns(maxOpenConns)
+	conn.SetMaxIdleConns(maxIdleConns)
+	conn.SetConnMaxIdleTime(connMaxLifetime)
 
 	ctx, cancel := context.WithTimeout(
 		context.Background(),
@@ -60,7 +53,5 @@ func New(cfg *config.DatabaseConfig) (*Database, error) {
 		return nil, err
 	}
 
-	return &Database{
-		Conn: conn,
-	}, nil
+	return conn, nil
 }
